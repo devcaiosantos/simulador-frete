@@ -3,29 +3,50 @@ import axios from "axios";
 interface GoogleGeocodeResponse {
   status: string;
   results: Array<{
+    address_components: Array<{
+      long_name: string;
+      short_name: string;
+      types: string[];
+    }>;
+    formatted_address: string;
     geometry: {
       location: {
         lat: number;
         lng: number;
       };
+      location_type: string;
+      viewport: {
+        northeast: {
+          lat: number;
+          lng: number;
+        };
+        southwest: {
+          lat: number;
+          lng: number;
+        };
+      };
     };
+    place_id: string;
+    plus_code: {
+      compound_code: string;
+      global_code: string;
+    };
+    types: string[];
   }>;
 }
 
-interface GoogleAutocompleteResponse {
-  status: string;
-  predictions: Array<{
-    description: string;
-    place_id: string;
-  }>;
+interface FormattedAddress {
+  street: string;
+  number: number;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
 }
 
 export class GoogleMapsService {
   constructor(private readonly apiKey: string) {}
 
-  /**
-   * Obtém a latitude e longitude a partir de um endereço.
-   */
   public async getLatLong(
     address: string,
   ): Promise<{ lat: number; lng: number }> {
@@ -51,32 +72,52 @@ export class GoogleMapsService {
       });
   }
 
-  public async getAutocompleteSuggestions(
-    input: string,
-  ): Promise<Array<{ description: string; place_id: string }>> {
-    const encodedInput = encodeURIComponent(input);
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodedInput}&key=${this.apiKey}`;
+  public async getFormattedAddress(address: string): Promise<FormattedAddress> {
+    const encodedAddress = encodeURIComponent(address);
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${this.apiKey}`;
 
     return axios
-      .get<GoogleAutocompleteResponse>(url)
+      .get<GoogleGeocodeResponse>(url)
       .then((response) => {
         const data = response.data;
         if (data.status !== "OK") {
-          throw new Error(`Autocomplete error: ${data.status}`);
+          throw new Error(`Geocoding error: ${data.status}`);
         }
-        return data.predictions.map((prediction) => ({
-          description: prediction.description,
-          place_id: prediction.place_id,
-        }));
+
+        const addressComponents = data.results[0].address_components;
+
+        const getComponent = (types: string[]) => {
+          const component = addressComponents.find((comp) =>
+            comp.types.some((type) => types.includes(type)),
+          );
+          return component ? component.long_name : "";
+        };
+
+        const street = getComponent(["route"]);
+        const number = parseInt(getComponent(["street_number"]), 10);
+        const city = getComponent(["administrative_area_level_2", "political"]);
+        const state = getComponent([
+          "administrative_area_level_1",
+          "political",
+        ]);
+        const zipCode = getComponent(["postal_code"]);
+        const country = getComponent(["country", "political"]);
+
+        return {
+          street,
+          number,
+          city,
+          state,
+          zipCode,
+          country,
+        };
       })
       .catch((error: unknown) => {
         let errorMessage = "Unknown error";
         if (error instanceof Error) {
           errorMessage = error.message;
         }
-        throw new Error(
-          `Failed to fetch autocomplete suggestions: ${errorMessage}`,
-        );
+        throw new Error(`Failed to fetch formatted address: ${errorMessage}`);
       });
   }
 }

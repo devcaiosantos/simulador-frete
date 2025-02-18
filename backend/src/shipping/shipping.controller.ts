@@ -1,12 +1,15 @@
-import { Controller, Post, Body, Param, Get } from "@nestjs/common";
+import { Controller, Post, Body, Param, Get, UsePipes } from "@nestjs/common";
 import { ShippingService } from "../@core/domain/services/shipping.service";
 import { CreateShippingDto } from "./dto/create-shipping.dto";
+import { FindByEmailDto } from "./dto/find-email.dto";
+import { ValidationPipe } from "@nestjs/common";
 
 @Controller("api/shipping")
 export class ShippingController {
   constructor(private readonly shippingService: ShippingService) {}
 
   @Post()
+  @UsePipes(ValidationPipe)
   simulateShipping(@Body() createShippingDto: CreateShippingDto) {
     return this.shippingService.calculateShipping({
       userEmail: createShippingDto.userEmail,
@@ -18,7 +21,8 @@ export class ShippingController {
   }
 
   @Get("/:userEmail")
-  findAllByUserEmail(@Param("userEmail") userEmail: string) {
-    return this.shippingService.findAllByUserEmail(userEmail);
+  @UsePipes(ValidationPipe)
+  findAllByUserEmail(@Param() params: FindByEmailDto) {
+    return this.shippingService.findAllByUserEmail(params.userEmail);
   }
 }

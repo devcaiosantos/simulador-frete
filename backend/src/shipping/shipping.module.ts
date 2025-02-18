@@ -25,6 +25,7 @@ import { GoogleMapsService } from "src/@core/infra/services/google-geocoding.ser
   controllers: [ShippingController],
   providers: [
     ShippingService,
+    GoogleMapsService,
     {
       provide: ShippingTypeOrmRepository,
       useFactory: (dataSource: DataSource) => {

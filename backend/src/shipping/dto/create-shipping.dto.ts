@@ -1,9 +1,25 @@
-import { Address } from "src/@core/domain/entities/address.entity";
-import { Dimensions } from "src/@core/domain/value-objects/dimensions.vo";
+import { IsEmail, IsString, IsNotEmpty, ValidateNested } from "class-validator";
+import { Type } from "class-transformer";
+import { AddressDto } from "./address.dto";
+import { DimensionsDto } from "./dimensions.dto";
 export class CreateShippingDto {
+  @IsEmail()
+  @IsNotEmpty()
   userEmail: string;
-  pickupAddress: Address;
-  deliveryAddress: Address;
-  dimensions: Dimensions;
+
+  @ValidateNested()
+  @Type(() => AddressDto)
+  pickupAddress: AddressDto;
+
+  @ValidateNested()
+  @Type(() => AddressDto)
+  deliveryAddress: AddressDto;
+
+  @ValidateNested()
+  @Type(() => DimensionsDto)
+  dimensions: DimensionsDto;
+
+  @IsString()
+  @IsNotEmpty()
   productName: string;
 }

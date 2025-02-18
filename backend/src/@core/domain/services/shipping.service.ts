@@ -1,7 +1,8 @@
 import { ShippingRepository } from "../repositories/shipping.repository";
 import { Shipping } from "../entities/shipping.entity";
 import { GoogleMapsService } from "../../infra/services/google-geocoding.service";
-import { Dimensions } from "../value-objects/dimensions.vo";
+import { Dimensions as DimensionsVO } from "../value-objects/dimensions.vo";
+import { Address as AddressVO } from "../value-objects/address.vo";
 import { Operator } from "../entities/operator.entity";
 import { OperatorRepository } from "../repositories/operator.repository";
 import { Address } from "../entities/address.entity";
@@ -22,19 +23,19 @@ export class ShippingService {
     productName,
   }: {
     userEmail: string;
-    pickupAddress: Address;
-    deliveryAddress: Address;
-    dimensions: Dimensions;
+    pickupAddress: AddressVO;
+    deliveryAddress: AddressVO;
+    dimensions: DimensionsVO;
     productName: string;
   }): Promise<Shipping> {
     const pickupAddressEntity = new Address(pickupAddress);
     const deliveryAddressEntity = new Address(deliveryAddress);
 
     const pickupCoords = await this.googleMapsService.getLatLong(
-      pickupAddress.fullAddress,
+      pickupAddressEntity.fullAddress,
     );
     const deliveryCoords = await this.googleMapsService.getLatLong(
-      deliveryAddress.fullAddress,
+      deliveryAddressEntity.fullAddress,
     );
 
     const shipping = new Shipping({
