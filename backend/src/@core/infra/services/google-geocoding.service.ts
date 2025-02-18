@@ -35,7 +35,7 @@ interface GoogleGeocodeResponse {
   }>;
 }
 
-interface FormattedAddress {
+export interface FormattedAddress {
   street: string;
   number: number;
   city: string;
@@ -95,13 +95,10 @@ export class GoogleMapsService {
 
         const street = getComponent(["route"]);
         const number = parseInt(getComponent(["street_number"]), 10);
-        const city = getComponent(["administrative_area_level_2", "political"]);
-        const state = getComponent([
-          "administrative_area_level_1",
-          "political",
-        ]);
+        const city = getComponent(["administrative_area_level_2"]);
+        const state = getComponent(["administrative_area_level_1"]);
         const zipCode = getComponent(["postal_code"]);
-        const country = getComponent(["country", "political"]);
+        const country = getComponent(["country"]);
 
         return {
           street,

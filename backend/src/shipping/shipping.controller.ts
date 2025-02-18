@@ -1,5 +1,6 @@
 import { Controller, Post, Body, Param, Get, UsePipes } from "@nestjs/common";
 import { ShippingService } from "../@core/domain/services/shipping.service";
+import { GoogleMapsService } from "src/@core/infra/services/google-geocoding.service";
 import { CreateShippingDto } from "./dto/create-shipping.dto";
 import { FindByEmailDto } from "./dto/find-email.dto";
 import { ValidationPipe } from "@nestjs/common";
@@ -24,5 +25,13 @@ export class ShippingController {
   @UsePipes(ValidationPipe)
   findAllByUserEmail(@Param() params: FindByEmailDto) {
     return this.shippingService.findAllByUserEmail(params.userEmail);
+  }
+
+  @Get("autocomplete_address/:zipCode")
+  async autocompleteAddress(@Param("zipCode") zipCode: string) {
+    const googleMapsService = new GoogleMapsService(
+      process.env.GOOGLE_MAPS_API_KEY || "",
+    );
+    return googleMapsService.getFormattedAddress(zipCode);
   }
 }
