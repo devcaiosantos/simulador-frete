@@ -1,17 +1,17 @@
-import { Address } from "../value-objects/address.vo";
-import { Dimensions } from "../value-objects/dimensions.vo";
 import { v4 as uuidv4 } from "uuid";
 
 export interface ShippingProps {
+  id?: string;
   userEmail: string;
-  pickupAddress: Address;
-  deliveryAddress: Address;
-  dimensions: Dimensions;
+  height: number;
+  width: number;
+  length: number;
   productName: string;
-  cheapestOperator?: ShippingOperator;
-  cheapestOperatorPrice?: number;
-  fastestOperator?: ShippingOperator;
-  fastestOperatorPrice?: number;
+  distance?: number;
+  pickupAddressId?: string;
+  deliveryAddressId?: string;
+  cheapestOperatorId?: string;
+  fastestOperatorId?: string;
 }
 
 export interface ShippingOperator {
@@ -28,30 +28,37 @@ export interface DistanceMultiplier {
   deliveryTime: number;
 }
 
+interface OperatorResponse {
+  name: string;
+  price: number;
+  deliveryTime: number;
+}
+
 export class Shipping {
-  private readonly _id: string;
-  private _userEmail: string;
-  private _pickupAddress: Address;
-  private _deliveryAddress: Address;
-  private _dimensions: Dimensions;
-  private _productName: string;
-  private _distance?: number;
-  private _cheapestOperator?: ShippingOperator;
-  private _cheapestOperatorPrice?: number;
-  private _fastestOperator?: ShippingOperator;
-  private _fastestOperatorPrice?: number;
+  id: string;
+  userEmail: string;
+  height: number;
+  width: number;
+  length: number;
+  productName: string;
+  distance?: number;
+  pickupAddressId?: string;
+  deliveryAddressId?: string;
+  cheapestOperatorId?: string;
+  fastestOperatorId?: string;
 
   constructor(props: ShippingProps, id?: string) {
-    this._id = id ?? uuidv4();
-    this._userEmail = props.userEmail;
-    this._pickupAddress = props.pickupAddress;
-    this._deliveryAddress = props.deliveryAddress;
-    this._dimensions = props.dimensions;
-    this._productName = props.productName;
-    this._cheapestOperator = props.cheapestOperator;
-    this._cheapestOperatorPrice = props.cheapestOperatorPrice;
-    this._fastestOperator = props.fastestOperator;
-    this._fastestOperatorPrice = props.fastestOperatorPrice;
+    this.id = id ?? uuidv4();
+    this.userEmail = props.userEmail;
+    this.height = props.height;
+    this.width = props.width;
+    this.length = props.length;
+    this.productName = props.productName;
+    this.distance = props.distance;
+    this.pickupAddressId = props.pickupAddressId;
+    this.deliveryAddressId = props.deliveryAddressId;
+    this.cheapestOperatorId = props.cheapestOperatorId;
+    this.fastestOperatorId = props.fastestOperatorId;
   }
 
   /**
@@ -63,7 +70,10 @@ export class Shipping {
     pickupCoords: { lat: number; lng: number },
     deliveryCoords: { lat: number; lng: number },
     operators: ShippingOperator[],
-  ): void {
+  ): {
+    cheapest: OperatorResponse;
+    fastest: OperatorResponse;
+  } {
     const distance = Shipping.haversine(
       pickupCoords.lat,
       pickupCoords.lng,
@@ -71,23 +81,21 @@ export class Shipping {
       deliveryCoords.lng,
     );
 
-    let cheapest: {
-      operator: ShippingOperator;
-      price: number;
-      deliveryTime: number;
-    } | null = null;
-    let fastest: {
-      operator: ShippingOperator;
-      price: number;
-      deliveryTime: number;
-    } | null = null;
+    let cheapest = {
+      name: "",
+      price: +Infinity,
+      deliveryTime: 0,
+    };
+
+    let fastest = {
+      name: "",
+      price: 0,
+      deliveryTime: +Infinity,
+    };
 
     for (const operator of operators) {
       let costPerCubicWeight =
-        (this._dimensions.height *
-          this._dimensions.width *
-          this._dimensions.length) /
-        operator.divisorWeight;
+        (this.height * this.width * this.length) / operator.divisorWeight;
 
       costPerCubicWeight = Math.max(costPerCubicWeight, operator.minCost);
 
@@ -109,7 +117,7 @@ export class Shipping {
 
       if (!cheapest || price < cheapest.price) {
         cheapest = {
-          operator,
+          name: operator.name,
           price,
           deliveryTime: distanceMultiplier.deliveryTime,
         };
@@ -117,18 +125,15 @@ export class Shipping {
 
       if (!fastest || distanceMultiplier.deliveryTime < fastest.deliveryTime) {
         fastest = {
-          operator,
+          name: operator.name,
           price,
           deliveryTime: distanceMultiplier.deliveryTime,
         };
       }
 
-      this._distance = distance;
-      this._cheapestOperator = cheapest.operator;
-      this._cheapestOperatorPrice = cheapest.price;
-      this._fastestOperator = fastest.operator;
-      this._fastestOperatorPrice = fastest.price;
+      this.distance = distance;
     }
+    return { cheapest, fastest };
   }
 
   private static haversine(
@@ -152,71 +157,5 @@ export class Shipping {
 
   private static deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
-  }
-
-  get id(): string {
-    return this._id;
-  }
-
-  get userEmail(): string {
-    return this._userEmail;
-  }
-
-  get height(): number {
-    return this._dimensions.height;
-  }
-
-  get width(): number {
-    return this._dimensions.width;
-  }
-
-  get length(): number {
-    return this._dimensions.length;
-  }
-
-  get productName(): string {
-    return this._productName;
-  }
-
-  get distance(): number | undefined {
-    return this._distance;
-  }
-
-  get cheapestOperator(): ShippingOperator | undefined {
-    return this._cheapestOperator;
-  }
-
-  get cheapestOperatorPrice(): number | undefined {
-    return this._cheapestOperatorPrice;
-  }
-
-  get fastestOperator(): ShippingOperator | undefined {
-    return this._fastestOperator;
-  }
-
-  get fastestOperatorPrice(): number | undefined {
-    return this._fastestOperatorPrice;
-  }
-
-  get pickupAddress(): Address {
-    return new Address(
-      this._pickupAddress.number,
-      this._pickupAddress.street,
-      this._pickupAddress.city,
-      this._pickupAddress.state,
-      this._pickupAddress.zipCode,
-      this._pickupAddress.country,
-    );
-  }
-
-  get deliveryAddress(): Address {
-    return new Address(
-      this._deliveryAddress.number,
-      this._deliveryAddress.street,
-      this._deliveryAddress.city,
-      this._deliveryAddress.state,
-      this._deliveryAddress.zipCode,
-      this._deliveryAddress.country,
-    );
   }
 }

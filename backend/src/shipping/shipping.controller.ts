@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from "@nestjs/common";
+import { Controller, Post, Body, Param, Get } from "@nestjs/common";
 import { ShippingService } from "../@core/domain/services/shipping.service";
 import { CreateShippingDto } from "./dto/create-shipping.dto";
 
@@ -15,5 +15,10 @@ export class ShippingController {
       dimensions: createShippingDto.dimensions,
       productName: createShippingDto.productName,
     });
+  }
+
+  @Get("/:userEmail")
+  findAllByUserEmail(@Param("userEmail") userEmail: string) {
+    return this.shippingService.findAllByUserEmail(userEmail);
   }
 }

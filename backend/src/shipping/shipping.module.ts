@@ -1,15 +1,27 @@
 import { Module } from "@nestjs/common";
 import { ShippingController } from "./shipping.controller";
+import { ShippingService } from "src/@core/domain/services/shipping.service";
+
 import { getDataSourceToken, TypeOrmModule } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
+
 import { ShippingSchema } from "../@core/infra/db/schema/shipping.schema";
-import { ShippingService } from "src/@core/domain/services/shipping.service";
 import { ShippingTypeOrmRepository } from "../@core/infra/db/repository/shipping-typeorm.repository";
 import { ShippingRepository } from "../@core/domain/repositories/shipping.repository";
-import { GoogleMapsService } from "src/@core/infra/services/google-geocoding.service";
 
+import { OperatorSchema } from "src/@core/infra/db/schema/operator.schema";
+import { OperatorTypeOrmRepository } from "src/@core/infra/db/repository/operator-typeorm.repository";
+import { OperatorRepository } from "src/@core/domain/repositories/operator.repository";
+
+import { AddressSchema } from "src/@core/infra/db/schema/address.schema";
+import { AddressTypeOrmRepository } from "src/@core/infra/db/repository/address-typeorm.repository";
+import { AddressRepository } from "src/@core/domain/repositories/address.repository";
+
+import { GoogleMapsService } from "src/@core/infra/services/google-geocoding.service";
 @Module({
-  imports: [TypeOrmModule.forFeature([ShippingSchema])],
+  imports: [
+    TypeOrmModule.forFeature([ShippingSchema, OperatorSchema, AddressSchema]),
+  ],
   controllers: [ShippingController],
   providers: [
     ShippingService,
@@ -23,14 +35,45 @@ import { GoogleMapsService } from "src/@core/infra/services/google-geocoding.ser
       inject: [getDataSourceToken()],
     },
     {
-      provide: ShippingService,
-      useFactory: (repo: ShippingRepository) => {
-        const googleMapsService = new GoogleMapsService(
-          "AIzaSyDQMixtzRqUw5z-kNF7_hT6YaIb5OTtxt0",
+      provide: OperatorTypeOrmRepository,
+      useFactory: (dataSource: DataSource) => {
+        return new OperatorTypeOrmRepository(
+          dataSource.getRepository(OperatorSchema),
         );
-        return new ShippingService(repo, googleMapsService);
       },
-      inject: [ShippingTypeOrmRepository],
+      inject: [getDataSourceToken()],
+    },
+    {
+      provide: AddressTypeOrmRepository,
+      useFactory: (dataSource: DataSource) => {
+        return new AddressTypeOrmRepository(
+          dataSource.getRepository(AddressSchema),
+        );
+      },
+      inject: [getDataSourceToken()],
+    },
+    {
+      provide: ShippingService,
+      useFactory: (
+        shippingRepo: ShippingRepository,
+        operatorRepo: OperatorRepository,
+        addressRepo: AddressRepository,
+      ) => {
+        const googleMapsService = new GoogleMapsService(
+          process.env.GOOGLE_MAPS_API_KEY || "",
+        );
+        return new ShippingService(
+          shippingRepo,
+          operatorRepo,
+          addressRepo,
+          googleMapsService,
+        );
+      },
+      inject: [
+        ShippingTypeOrmRepository,
+        OperatorTypeOrmRepository,
+        AddressTypeOrmRepository,
+      ],
     },
   ],
 })

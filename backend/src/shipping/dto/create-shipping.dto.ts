@@ -1,4 +1,4 @@
-import { Address } from "src/@core/domain/value-objects/address.vo";
+import { Address } from "src/@core/domain/entities/address.entity";
 import { Dimensions } from "src/@core/domain/value-objects/dimensions.vo";
 export class CreateShippingDto {
   userEmail: string;

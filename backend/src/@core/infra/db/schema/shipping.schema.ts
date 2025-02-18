@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
-
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
+import { AddressSchema } from "./address.schema";
+import { OperatorSchema } from "./operator.schema";
 @Entity("shippings")
 export class ShippingSchema {
   @PrimaryColumn()
@@ -7,12 +8,6 @@ export class ShippingSchema {
 
   @Column()
   userEmail: string;
-
-  @Column()
-  pickupAddress: string;
-
-  @Column()
-  deliveryAddress: string;
 
   @Column("float")
   height: number;
@@ -26,15 +21,22 @@ export class ShippingSchema {
   @Column()
   productName: string;
 
-  @Column({ nullable: true })
-  cheapestOperator?: string;
+  @Column("float")
+  distance: number;
 
-  @Column({ nullable: true, type: "float" })
-  cheapestOperatorPrice?: number;
+  @OneToOne(() => OperatorSchema)
+  @JoinColumn({ name: "cheapestOperatorId" })
+  cheapestOperatorId: string;
 
-  @Column({ nullable: true })
-  fastestOperator?: string;
+  @OneToOne(() => OperatorSchema)
+  @JoinColumn({ name: "fastestOperatorId" })
+  fastestOperatorId: string;
 
-  @Column({ nullable: true, type: "float" })
-  fastestOperatorPrice?: number;
+  @OneToOne(() => AddressSchema)
+  @JoinColumn({ name: "pickupAddressId" })
+  pickupAddressId: string;
+
+  @OneToOne(() => AddressSchema)
+  @JoinColumn({ name: "deliveryAddressId" })
+  deliveryAddressId: string;
 }
