@@ -9,15 +9,9 @@ interface ProductStepProps {
         length: number;
     };
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    formErrors: FormErrors;
+    formErrors: Record<string, string>;
 }
 
-interface FormErrors {
-    name: string;
-    height: string;
-    width: string;
-    length: string;
-}
 
 export const ProductStep = ({ productDetails, formErrors, onChange }: ProductStepProps) => (
   <Box>

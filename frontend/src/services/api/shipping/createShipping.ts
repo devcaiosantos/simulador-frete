@@ -30,7 +30,7 @@ const createShipping = async (data: IShipping): Promise<ICreateShippingResponse>
         const status: Status = "success";
         return {
             status: status,
-            message: "Aluno matriculado com sucesso",
+            message: "Simulação registrada com sucesso",
             data: response.data
         };
     } catch (error) {
