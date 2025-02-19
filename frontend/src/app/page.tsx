@@ -1,95 +1,191 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import { AddressStep } from "@/components/FormsSteps/AddressStep";
+import { ProductStep } from "@/components/FormsSteps/ProductStep";
+import { Box, Button, Flex } from "@chakra-ui/react";
+import { useState } from "react";
+import * as Yup from 'yup';
+import createShipping from "@/services/api/createShipping";
 
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+const addressSchema = Yup.object({
+    number: Yup.number().required('Número é obrigatório'),
+    street: Yup.string().required('Rua é obrigatória'),
+    city: Yup.string().required('Cidade é obrigatória'),
+    state: Yup.string().required('Estado é obrigatório'),
+    zipCode: Yup.string().required('CEP é obrigatório'),
+    country: Yup.string().required('País é obrigatório'),
+  });
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+const productDetails = Yup.object({
+    name: Yup.string().required('Nome do produto é obrigatório'),
+    height: Yup.number().required('Altura é obrigatória'),
+    width: Yup.number().required('Largura é obrigatória'),
+    length: Yup.number().required('Comprimento é obrigatório'),
+  });
+
+const initialValues = {
+  pickupAddress: {
+    number: 0,
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: '',
+  },
+  deliveryAddress: {
+    number: 0,
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: '',
+  },
+  productDetails:{
+    name: '',
+    height: 0,
+    width: 0,
+    length: 0,
+  }
+};
+
+const defaultErrors = {
+  1:{
+    name: '',
+    height: '',
+    width: '',
+    length: '',
+  },
+  2: {
+    number: '',
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: '',
+  },
+  3: {
+    number: '',
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: '',
+  }
 }
+
+export default function Page(){
+  const [formData, setFormData] = useState(initialValues);
+  const [formErrors, setFormErrors] = useState(defaultErrors || {});
+  const [step, setStep] = useState(1);
+  const nextStep = () => setStep(step + 1);
+  const prevStep = () => setStep(step - 1);
+
+  const handleChange = (e,stepName) => {
+    const { name, value } = e.target;
+    let formattedValue = value;
+    if((["height","width","length","zipCode","number"].includes(name))){
+      formattedValue = formatNumber(value);
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [stepName]: {
+        ...prev[stepName],
+        [name]: formattedValue,
+      },
+    }));
+  }
+
+  const formatNumber = (value: string) => {
+    return value.replace(/\D/g, '');
+  }
+
+  const handleNextStep = async () => {
+    try{
+      if(step === 1){
+        await productDetails.validate(formData.productDetails , {abortEarly: false})
+        setFormErrors({});
+        nextStep();
+      }
+      if(step === 2){
+        await addressSchema.validate(formData.pickupAddress , {abortEarly: false})
+        setFormErrors({});
+        nextStep();
+      }
+      if(step === 3){
+        await addressSchema.validate(formData.deliveryAddress , {abortEarly: false})
+        setFormErrors({});
+        handleSubmit();
+      }
+      
+    } catch(err){
+        if (err instanceof Yup.ValidationError) {
+
+          const yupErrors: Yup.ValidationError = err;
+          const newErrors: Record<string, string> = {};
+
+          yupErrors.inner.forEach((e) => {
+            newErrors[e.path as string] = e.message;
+          });
+
+          setFormErrors((prev) => ({
+            ...prev,
+            [step]: newErrors,
+          }));
+        }
+    }
+    
+  }
+
+  const handleSubmit = async () => {
+    
+    const formattedData = {
+      pickupAddress: formData.pickupAddress,
+      deliveryAddress: formData.deliveryAddress,
+      dimensions: {
+        height: formData.productDetails.height,
+        width: formData.productDetails.width,
+        length: formData.productDetails.length,
+      },
+      productName: formData.productDetails.name,
+    }
+
+    const response = await createShipping(formattedData);
+    console.log(response);
+    
+  };
+  
+
+  return (
+    <Box>
+      {step === 1 && (
+        <ProductStep
+          productDetails={formData.productDetails}
+          formErrors={formErrors[step]}
+          onChange={(e) => handleChange(e,'productDetails')}
+        />
+      )}
+
+      {step === 2 && (
+        <AddressStep
+          address={formData.pickupAddress}
+          //formErrors={formErrors[step]}
+          onChange={(e) => handleChange(e,'pickupAddress')}
+        />
+      )}
+      {step === 3 && (
+        <AddressStep
+          address={formData.deliveryAddress}
+          //formErrors={formErrors[step]}
+          onChange={(e) => handleChange(e,'deliveryAddress')}
+        />
+      )}
+
+      <Flex>
+        {step > 1 && <Button onClick={prevStep}>Anterior</Button>}
+        {step < 3 && <Button onClick={handleNextStep}>Próximo</Button>}
+        {step === 3 && <Button onClick={handleNextStep}>Simular</Button>}
+      </Flex>
+
+    </Box>
+  )
+};

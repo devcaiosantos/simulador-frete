@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "eslint:recommended",
+
+    "plugin:@next/next/recommended",
+
+    "plugin:prettier/recommended"
+  ],
+
+  "plugins": ["prettier"],
+
+  "rules": {
+    "prettier/prettier": ["error"],
+    "@typescript-eslint/no-empty-object-type": "off",
+  }
+}
