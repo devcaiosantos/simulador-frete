@@ -27,11 +27,11 @@ export class ShippingController {
     return this.shippingService.findAllByUserEmail(params.userEmail);
   }
 
-  @Get("autocomplete_address/:zipCode")
-  async autocompleteAddress(@Param("zipCode") zipCode: string) {
+  @Get("autocompleteAddress/:address")
+  async autocompleteAddress(@Param("address") address: string) {
     const googleMapsService = new GoogleMapsService(
       process.env.GOOGLE_MAPS_API_KEY || "",
     );
-    return googleMapsService.getFormattedAddress(zipCode);
+    return googleMapsService.getFormattedAddress(address);
   }
 }
