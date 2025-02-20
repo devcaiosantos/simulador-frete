@@ -23,16 +23,17 @@ services:
   
   frontend:
     build:
-      context: ./frontend 
+      context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:${BACKEND_PORT}/api
     container_name: frontend-sf
     ports:
-      - "3000:3000"
-    depends_on:
-      - backend
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:${BACKEND_PORT}
+    depends_on:
+      - backend
     networks:
       - app-network
   

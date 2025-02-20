@@ -1,19 +1,16 @@
-# Etapa de build
 FROM node:22.14.0 AS builder
 
-# Define o diretório de trabalho
 WORKDIR /app
 
-# Copia os arquivos de definição de dependências
 COPY package.json package-lock.json* ./
 
-# Instala as dependências
 RUN npm install --frozen-lockfile
 
-# Copia o restante dos arquivos do projeto
 COPY . .
 
-# Gera a build da aplicação
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 RUN npm run build
 
 # Etapa de produção

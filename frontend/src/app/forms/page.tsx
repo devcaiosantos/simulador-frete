@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react"; // Import Suspense
 import createShipping from "@/services/api/shipping/createShipping";
 import autocompleteAddress from "@/services/api/shipping/autocompleteAddress";
 import { useSearchParams } from "next/navigation";
@@ -78,8 +78,7 @@ const initialValues = {
   }
 };
 
-
-export default function Page(){
+function FormsPage() {
   const searchParams = useSearchParams()
   const userEmail = searchParams.get('email')
   const [formData, setFormData] = useState(initialValues);
@@ -87,6 +86,7 @@ export default function Page(){
   const [step, setStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [shippingSimulation, setShippingSimulation] = useState<IShippingSimulation>(null);
+  const [error, setError] = useState(null);
 
   const nextStep = () => setStep(step + 1);
 
@@ -118,7 +118,9 @@ export default function Page(){
     if(value.length > 9){
       return value.slice(0,9);
     }
-    return value.replace(/(\d{5})(\d{3})/, "$1-$2");
+
+    return value.replace(/\D/g, '')
+    .replace(/(\d{5})(\d{3})/, "$1-$2");
   }
 
   const autofillAddress = async (address: string, stepName:string) => {
@@ -139,8 +141,9 @@ export default function Page(){
     }
   }
 
-  const handleNextStep = async (newStep) => {
+  const handleNextStep = async (newStep:number) => {
     if(newStep < step){
+      setError(null);
       setFormErrors({});
       setStep(newStep);
       return;
@@ -195,13 +198,18 @@ export default function Page(){
 
     }
     const response = await createShipping(formattedData);
+    if(response && response.status === "error"){
+      setError(response.message);
+    };
 
     if(response && response.status === "success"){
       setTimeout(() => {
-        setIsLoading(false);
         setShippingSimulation(response.data)
       }, 2000);
     }
+
+    setIsLoading(false);
+
   };
   
   return (
@@ -251,6 +259,13 @@ export default function Page(){
               />
             </StepsContent>
             <StepsCompletedContent>
+
+              {
+                error && !isLoading && (
+                  <p>Não foi possível fazer a simulação, revise os endereços</p>
+                )
+              }
+
               {
                 isLoading && <Skeleton height="200px" />
               }
@@ -260,6 +275,7 @@ export default function Page(){
                   ShippingSimulation({simulation: shippingSimulation})
                 )
               }
+
             </StepsCompletedContent>
 
             <Group>
@@ -278,4 +294,12 @@ export default function Page(){
       </FormContainer>
     </Container>
   )
-};
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FormsPage />
+    </Suspense>
+  );
+}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import findAllShippingsByEmail from '@/services/api/shipping/findAllByEmail';
 import { IShippingSimulation } from '@/interfaces/shippingSimulation';
@@ -7,7 +7,7 @@ import { toaster } from "@/components/ui/toaster"
 import { BackToHome, Container, HistoryContainer, HistoryItem, ShippingInfo, TitlePage } from './style';
 import { NewSimulationButton } from './style';
 
-const HistoryPage: React.FC = () => {
+function HistoryPage () {
     const searchParams = useSearchParams();
     const email = searchParams.get('email');
     const [shippings, setShippings] = useState<IShippingSimulation[]>([]);
@@ -76,4 +76,10 @@ const HistoryPage: React.FC = () => {
     );
 };
 
-export default HistoryPage;
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HistoryPage />
+    </Suspense>
+  );
+}
