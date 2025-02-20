@@ -33,7 +33,7 @@ const HistoryPage: React.FC = () => {
     <Container>
       <TitlePage>Histórico de Simulações - {email}</TitlePage>
     
-      <NewSimulationButton onClick={()=>window.location.href=`/forms?${email}`}>
+      <NewSimulationButton onClick={()=>window.location.href=`/forms?email=${email}`}>
         Nova Simulação
       </NewSimulationButton>
       {email && (

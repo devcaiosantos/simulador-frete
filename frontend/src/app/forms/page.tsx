@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import createShipping from "@/services/api/shipping/createShipping";
+import autocompleteAddress from "@/services/api/shipping/autocompleteAddress";
 import { useSearchParams } from "next/navigation";
 import { AddressStep } from "@/components/FormsSteps/AddressStep";
 import { ProductStep } from "@/components/FormsSteps/ProductStep";
@@ -22,10 +23,9 @@ import {
 import {
   Skeleton,
 } from "@/components/ui/skeleton"
-import { LuListCheck, LuPackage, LuPackageCheck } from "react-icons/lu";
+import { LuListCheck, LuPackageCheck, LuTruck } from "react-icons/lu";
 import { IShippingSimulation } from "@/interfaces/shippingSimulation";
 import { ShippingSimulation } from "@/components/ShippingSimulation";
-
 
 const addressSchema = Yup.object({
     number: Yup.number().required('Número é obrigatório'),
@@ -38,33 +38,43 @@ const addressSchema = Yup.object({
 
 const productDetails = Yup.object({
     name: Yup.string().required('Nome do produto é obrigatório'),
-    height: Yup.number().required('Altura é obrigatória'),
-    width: Yup.number().required('Largura é obrigatória'),
-    length: Yup.number().required('Comprimento é obrigatório'),
+    height: Yup.number().min(
+      1,
+      'Altura deve ser maior que 0'
+    ).required('Altura é obrigatória'),
+    width: Yup.number().min(
+      1,
+      'Largura deve ser maior que 0'
+    )
+    .required('Largura é obrigatória'),
+    length: Yup.number().min(
+      1,
+      'Comprimento deve ser maior que 0'
+    ).required('Comprimento é obrigatório'),
   });
 
 const initialValues = {
   pickupAddress: {
-    number: 103,
-    street: "Rua dos Crisântemos",
-    city: "Campo Mourão",
-    state: "Paraná",
-    zipCode: "87308170",
-    country: "Brasil",
+    number: 0,
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
   },
   deliveryAddress: {
-    number: 103,
-    street: "Rua dos Crisântemos",
-    city: "Campo Mourão",
-    state: "Paraná",
-    zipCode: "87308170",
-    country: "Brasil",
+    number: 0,
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
   },
   productDetails:{
-    name: "Caixa Z",
-    height: 100,
-    width: 100,
-    length: 100,
+    name: "",
+    height: 0,
+    width: 0,
+    length: 0,
   }
 };
 
@@ -86,6 +96,10 @@ export default function Page(){
     if((["height","width","length","number"].includes(name))){
       formattedValue = formatNumber(value);
     }
+    if(name=="zipCode"){
+      formattedValue = formatZipCode(value);
+      if(formattedValue.length === 9)autofillAddress(formattedValue,stepName);
+    }
 
     setFormData((prev) => ({
       ...prev,
@@ -95,9 +109,34 @@ export default function Page(){
       },
     }));
   }
-
+  
   const formatNumber = (value: string) => {
     return Number(value.replace(/\D/g, ''));
+  }
+
+  const formatZipCode = (value: string) => {
+    if(value.length > 9){
+      return value.slice(0,9);
+    }
+    return value.replace(/(\d{5})(\d{3})/, "$1-$2");
+  }
+
+  const autofillAddress = async (address: string, stepName:string) => {
+    const response = await autocompleteAddress(address);
+    if(response.status === "success"){
+      const formattedAddress = {
+        city: response.data.city,
+        state: response.data.state,
+        country: response.data.country,
+      }
+      setFormData((prev) => ({
+        ...prev,
+        [stepName]: {
+          ...prev[stepName],
+          ...formattedAddress,
+        },
+      }));
+    }
   }
 
   const handleNextStep = async (newStep) => {
@@ -169,7 +208,7 @@ export default function Page(){
     <Container>
       <HeaderForm>
         <BackToHistory href={`/history?email=${userEmail}`}>
-          Voltar para Histórico
+          Ver histórico
         </BackToHistory>
         <FormTitle>
           Simulação de Frete
@@ -186,7 +225,7 @@ export default function Page(){
           >
             <StepsList>
               <StepsItem index={0} icon={<LuListCheck/>} title="Informações do Produto" />
-              <StepsItem index={1} icon={<LuPackage/>} title="Endereço de Coleta" />
+              <StepsItem index={1} icon={<LuTruck/>} title="Endereço de Coleta" />
               <StepsItem index={2} icon={<LuPackageCheck/>} title="Endereço de Entrega" />
             </StepsList>
 
