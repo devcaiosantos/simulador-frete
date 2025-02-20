@@ -1,9 +1,8 @@
-import { IsEmail, IsString, IsNotEmpty, ValidateNested } from "class-validator";
+import { IsString, IsNotEmpty, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 import { AddressDto } from "./address.dto";
 import { DimensionsDto } from "./dimensions.dto";
 export class CreateShippingDto {
-  @IsEmail()
   @IsNotEmpty()
   userEmail: string;
 

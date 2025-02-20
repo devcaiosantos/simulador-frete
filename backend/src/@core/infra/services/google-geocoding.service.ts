@@ -51,7 +51,7 @@ export class GoogleMapsService {
     address: string,
   ): Promise<{ lat: number; lng: number }> {
     const encodedAddress = encodeURIComponent(address);
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${this.apiKey}`;
+    const url = `${process.env.GOOGLE_MAPS_API_KEY}${encodedAddress}&key=${this.apiKey}`;
 
     return axios
       .get<GoogleGeocodeResponse>(url)
@@ -74,7 +74,7 @@ export class GoogleMapsService {
 
   public async getFormattedAddress(address: string): Promise<FormattedAddress> {
     const encodedAddress = encodeURIComponent(address);
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${this.apiKey}`;
+    const url = `${process.env.GOOGLE_MAPS_API_KEY}${encodedAddress}&key=${this.apiKey}`;
 
     return axios
       .get<GoogleGeocodeResponse>(url)

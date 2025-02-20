@@ -27,7 +27,7 @@ export class ShippingController {
     return this.shippingService.findAllByUserEmail(params.userEmail);
   }
 
-  @Get("autocompleteAddress/:address")
+  @Get("autocomplete-address/:address")
   async autocompleteAddress(@Param("address") address: string) {
     const googleMapsService = new GoogleMapsService(
       process.env.GOOGLE_MAPS_API_KEY || "",
