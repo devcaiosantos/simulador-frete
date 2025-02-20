@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { IShipping } from '@/interfaces/shipping';
+import { IShippingSimulation } from '@/interfaces/shippingSimulation';
 
 interface IFindAllShippingsByEmailResponse {
     status: "success" | "error";
     message: string;
-    data?: IShipping[];
+    data?: IShippingSimulation[];
 }
 
 export type Status = "success" | "error";
@@ -24,7 +24,7 @@ const findAllShippingsByEmail = async (email:string): Promise<IFindAllShippingsB
     };
 
     try {
-        const response = await axios<IShipping[]>(config);
+        const response = await axios<IShippingSimulation[]>(config);
 
         const status: Status = "success";
         return {

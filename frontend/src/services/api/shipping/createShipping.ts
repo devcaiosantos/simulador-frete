@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { IShipping } from '@/interfaces/shipping';
-
+import { IShippingSimulation } from '@/interfaces/shippingSimulation';
 interface ICreateShippingResponse {
     status: "success" | "error";
     message: string;
-    data?: IShipping;
+    data?: IShippingSimulation;
 }
 
 export type Status = "success" | "error";
@@ -25,7 +25,7 @@ const createShipping = async (data: IShipping): Promise<ICreateShippingResponse>
     };
 
     try {
-        const response = await axios<IShipping>(config);
+        const response = await axios<IShippingSimulation>(config);
 
         const status: Status = "success";
         return {

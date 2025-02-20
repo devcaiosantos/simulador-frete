@@ -1,5 +1,6 @@
-import { Box, Input } from '@chakra-ui/react';
+import { Input } from '@chakra-ui/react';
 import { Field } from '@/components/ui/field';
+import { InputsContainer } from '../style';
 
 interface ProductStepProps {
     productDetails: {
@@ -14,7 +15,7 @@ interface ProductStepProps {
 
 
 export const ProductStep = ({ productDetails, formErrors, onChange }: ProductStepProps) => (
-  <Box>
+  <InputsContainer>
     <Field label="Nome do Produto">
       <Input name="name" value={productDetails.name} onChange={onChange} />
         {formErrors.name && <span>{formErrors.name}</span>}
@@ -34,5 +35,5 @@ export const ProductStep = ({ productDetails, formErrors, onChange }: ProductSte
         <Input name="length" value={productDetails.length} onChange={onChange} />
         {formErrors.length && <span>{formErrors.length}</span>}
     </Field>
-  </Box>
+  </InputsContainer>
 );

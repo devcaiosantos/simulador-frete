@@ -1,31 +1,44 @@
 "use client";
-import { Field } from '@/components/ui/field';
-import { Button, Input } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { Field } from "@/components/ui/field";
+
+import {
+  FormContainer,
+  FormCard,
+  FormTitle,
+  StyledInput,
+  StyledButton,
+} from "./style";
+
+
 
 const EmailForm: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (!email) return;
-    window.location.href = `/history?email=${email}`
+    window.location.href = `/forms?email=${email}`;
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <Field label={"E-mail"}>
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </Field>
-        <Button type="submit">Acessar</Button>
-      </form>
-    </div>
+    <FormContainer>
+      <FormCard>
+        <FormTitle>Simulador de Frete</FormTitle>
+        <form onSubmit={handleSubmit}>
+          <Field label={"E-mail"}>
+            <StyledInput
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Digite seu e-mail"
+              required
+            />
+          </Field>
+          <StyledButton type="submit">Acessar</StyledButton>
+        </form>
+      </FormCard>
+    </FormContainer>
   );
 };
 
