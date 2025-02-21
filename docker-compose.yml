@@ -31,6 +31,7 @@ services:
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     environment:
+      - PORT=${FRONTEND_PORT}
       - NODE_ENV=production
     depends_on:
       - backend
