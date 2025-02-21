@@ -12,6 +12,7 @@ export interface ShippingProps {
   deliveryAddressId?: string;
   cheapestOperatorId?: string;
   fastestOperatorId?: string;
+  createdAt?: Date;
 }
 
 export interface ShippingOperator {
@@ -46,6 +47,7 @@ export class Shipping {
   deliveryAddressId?: string;
   cheapestOperatorId?: string;
   fastestOperatorId?: string;
+  createdAt?: Date;
 
   constructor(props: ShippingProps, id?: string) {
     this.id = id ?? uuidv4();
@@ -59,6 +61,7 @@ export class Shipping {
     this.deliveryAddressId = props.deliveryAddressId;
     this.cheapestOperatorId = props.cheapestOperatorId;
     this.fastestOperatorId = props.fastestOperatorId;
+    this.createdAt = props.createdAt;
   }
 
   /**
@@ -66,7 +69,7 @@ export class Shipping {
    * @param deliveryCoords Coordenadas da entrega ({ lat, lng })
    * @param operators Lista de operadores com preço por km e velocidade (km/h)
    */
-  public simulateShipping(
+  public calculateShipping(
     pickupCoords: { lat: number; lng: number },
     deliveryCoords: { lat: number; lng: number },
     operators: ShippingOperator[],

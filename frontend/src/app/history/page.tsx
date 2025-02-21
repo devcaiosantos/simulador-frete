@@ -68,6 +68,9 @@ function HistoryPage () {
                 <strong>Operadora mais rápida:</strong> 
                 {shipping.fastestOperatorId.name} - ${shipping.fastestOperatorId.price} - {shipping.fastestOperatorId.deliveryTime} dia(s)
               </div>
+             <div className="date">
+                <strong>Data e Horário:</strong> {new Date(shipping.createdAt).toLocaleString()}
+             </div>
             </HistoryItem>
           ))
         )}

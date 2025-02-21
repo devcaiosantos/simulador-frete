@@ -44,6 +44,7 @@ export class ShippingTypeOrmRepository implements ShippingRepository {
   async findAllByUserEmail(userEmail: string): Promise<Shipping[]> {
     const shippings = await this.ormRepo.find({
       where: { userEmail },
+      order: { createdAt: "DESC" },
       relations: [
         "pickupAddressId",
         "deliveryAddressId",
@@ -51,7 +52,6 @@ export class ShippingTypeOrmRepository implements ShippingRepository {
         "fastestOperatorId",
       ],
     });
-
     return shippings.map((shipping) => new Shipping(shipping));
   }
 }

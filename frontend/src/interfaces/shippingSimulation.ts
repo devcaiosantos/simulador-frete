@@ -13,4 +13,5 @@ export interface IShippingSimulation{
     deliveryAddressId: IAddress;
     cheapestOperatorId: IOperator;
     fastestOperatorId: IOperator;
+    createdAt: Date;
 }

@@ -15,7 +15,7 @@ export class ShippingService {
     private readonly googleMapsService: GoogleMapsService,
   ) {}
 
-  async calculateShipping({
+  async simulateShipping({
     userEmail,
     pickupAddress,
     deliveryAddress,
@@ -48,7 +48,7 @@ export class ShippingService {
       deliveryAddressId: deliveryAddressEntity.id,
     });
 
-    const { fastest, cheapest } = shipping.simulateShipping(
+    const { fastest, cheapest } = shipping.calculateShipping(
       pickupCoords,
       deliveryCoords,
       [

@@ -39,4 +39,7 @@ export class ShippingSchema {
   @OneToOne(() => AddressSchema)
   @JoinColumn({ name: "deliveryAddressId" })
   deliveryAddressId: string;
+
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
 }

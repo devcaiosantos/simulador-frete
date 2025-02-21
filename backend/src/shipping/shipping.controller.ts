@@ -12,7 +12,7 @@ export class ShippingController {
   @Post()
   @UsePipes(ValidationPipe)
   simulateShipping(@Body() createShippingDto: CreateShippingDto) {
-    return this.shippingService.calculateShipping({
+    return this.shippingService.simulateShipping({
       userEmail: createShippingDto.userEmail,
       pickupAddress: createShippingDto.pickupAddress,
       deliveryAddress: createShippingDto.deliveryAddress,

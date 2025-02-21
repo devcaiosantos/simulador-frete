@@ -200,16 +200,15 @@ function FormsPage() {
     const response = await createShipping(formattedData);
     if(response && response.status === "error"){
       setError(response.message);
+      setIsLoading(false);
     };
 
     if(response && response.status === "success"){
       setTimeout(() => {
-        setShippingSimulation(response.data)
+        setShippingSimulation(response.data);
+        setIsLoading(false);
       }, 2000);
     }
-
-    setIsLoading(false);
-
   };
   
   return (
