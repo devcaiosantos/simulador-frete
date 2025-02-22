@@ -21,7 +21,7 @@ Antes de iniciar a instalação, certifique-se de ter os seguintes requisitos at
 ### 1. Clonar o Repositório
 ```sh
 git clone https://github.com/devcaiosantos/simulador-frete.git
-cd imulador-frete
+cd simulador-frete
 ```
 
 ### 2. Configurar Variáveis de Ambiente
