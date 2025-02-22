@@ -1,11 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty } from "class-validator";
 
-export class FindByEmailDto {
+export class AutocompleteAddressDto {
   @ApiProperty({
-    example: "john@example.com",
-    description: "Email do usuário",
+    example: "87307-000",
+    description: "Endereço",
   })
   @IsNotEmpty()
-  userEmail: string;
+  address: string;
 }
