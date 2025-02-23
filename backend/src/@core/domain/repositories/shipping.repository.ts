@@ -1,4 +1,4 @@
-import { Shipping } from "../entities/shipping.entity";
+import { Shipping } from "../entities/shipping/shipping.entity";
 
 export interface ShippingRepository {
   insert(Shipping: Shipping): Promise<void>;

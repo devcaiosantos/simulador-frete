@@ -1,6 +1,6 @@
 import { Repository } from "typeorm";
 import { ShippingSchema } from "../schema/shipping.schema";
-import { Shipping } from "../../../domain/entities/shipping.entity";
+import { Shipping } from "../../../domain/entities/shipping/shipping.entity";
 import { ShippingRepository } from "../../../domain/repositories/shipping.repository";
 
 export class ShippingTypeOrmRepository implements ShippingRepository {

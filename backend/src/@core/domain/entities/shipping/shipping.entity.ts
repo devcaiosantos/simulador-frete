@@ -139,7 +139,7 @@ export class Shipping {
     return { cheapest, fastest };
   }
 
-  private static haversine(
+  static haversine(
     lat1: number,
     lon1: number,
     lat2: number,
@@ -158,7 +158,7 @@ export class Shipping {
     return R * c;
   }
 
-  private static deg2rad(deg: number): number {
+  static deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
   }
 }

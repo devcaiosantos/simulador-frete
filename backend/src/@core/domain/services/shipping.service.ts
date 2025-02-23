@@ -1,5 +1,5 @@
 import { ShippingRepository } from "../repositories/shipping.repository";
-import { Shipping } from "../entities/shipping.entity";
+import { Shipping } from "../entities/shipping/shipping.entity";
 import { GoogleMapsService } from "../../infra/services/google-geocoding.service";
 import { Dimensions as DimensionsVO } from "../value-objects/dimensions.vo";
 import { Address as AddressVO } from "../value-objects/address.vo";
