@@ -38,17 +38,23 @@ const addressSchema = Yup.object({
 
 const productDetails = Yup.object({
     name: Yup.string().required('Nome do produto é obrigatório'),
-    height: Yup.number().min(
-      1,
+    height: Yup.number()
+    .typeError('Altura deve ser um número válido')
+    .min(
+      0.01,
       'Altura deve ser maior que 0'
     ).required('Altura é obrigatória'),
-    width: Yup.number().min(
-      1,
+    width: Yup.number()
+    .typeError('Largura deve ser um número válido')
+    .min(
+      0.01,
       'Largura deve ser maior que 0'
     )
     .required('Largura é obrigatória'),
-    length: Yup.number().min(
-      1,
+    length: Yup.number()
+    .typeError('Comprimento deve ser um número válido')
+    .min(
+      0.01,
       'Comprimento deve ser maior que 0'
     ).required('Comprimento é obrigatório'),
   });
@@ -93,9 +99,15 @@ function FormsPage() {
   const handleChange = (e,stepName) => {
     const { name, value } = e.target;
     let formattedValue = value;
-    if((["height","width","length","number"].includes(name))){
+
+    if(name=="number"){
       formattedValue = formatNumber(value);
     }
+
+    if((["height","width","length"].includes(name))){
+      formattedValue = formatDimensions(value);
+    }
+
     if(name=="zipCode"){
       formattedValue = formatZipCode(value);
       if(formattedValue.length === 9)autofillAddress(formattedValue,stepName);
@@ -111,7 +123,21 @@ function FormsPage() {
   }
   
   const formatNumber = (value: string) => {
-    return Number(value.replace(/\D/g, ''));
+    const numericValue = value.replace(/[^0-9]/g, '')
+    return Number(numericValue);
+  }
+
+  const formatDimensions = (value: string) => {
+      let formatted = value.replace(/[^0-9,.]/g, "");
+  
+      formatted = formatted.replace(/,/g, ".");
+  
+      const decimalIndex = formatted.indexOf(".");
+      if (decimalIndex !== -1) {
+          formatted = formatted.substring(0, decimalIndex + 3);
+      }
+      
+      return formatted
   }
 
   const formatZipCode = (value: string) => {
@@ -189,9 +215,9 @@ function FormsPage() {
       pickupAddress: formData.pickupAddress,
       deliveryAddress: formData.deliveryAddress,
       dimensions: {
-        height: formData.productDetails.height,
-        width: formData.productDetails.width,
-        length: formData.productDetails.length,
+        height: Number(formData.productDetails.height),
+        width: Number(formData.productDetails.width),
+        length: Number(formData.productDetails.length),
       },
       productName: formData.productDetails.name,
       userEmail: userEmail,
@@ -204,10 +230,8 @@ function FormsPage() {
     };
 
     if(response && response.status === "success"){
-      setTimeout(() => {
-        setShippingSimulation(response.data);
-        setIsLoading(false);
-      }, 2000);
+      setShippingSimulation(response.data);
+      setIsLoading(false);
     }
   };
   
