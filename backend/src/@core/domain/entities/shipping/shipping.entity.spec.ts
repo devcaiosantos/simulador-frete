@@ -47,14 +47,6 @@ describe("Shipping Entity", () => {
     });
   });
 
-  describe("env vars", () => {
-    it("should throw an error if the GOOGLE_MAPS_API_KEY is not set", () => {
-      const env = process.env.GOOGLE_MAPS_API_KEY;
-
-      expect(env).toBe("AIzaSyDQMixtzRqUw5z-kNF7_hT6YaIb5OTtxt0");
-    });
-  });
-
   describe("calculateShipping", () => {
     it("should return the cheapest and fastest shipping options", async () => {
       const pickupAddress = {
