@@ -9,7 +9,7 @@ interface ShippingSimulationProps {
 export const ShippingSimulation = ({simulation}: ShippingSimulationProps) => {
 
     function fullAddress(address: IAddress){
-        return `${address.number} ${address.street}, ${address.city} - ${address.state}, ${address.zipCode} ${address.country}`
+        return `${address.street}, ${address.number}, ${address.city} - ${address.state}, ${address.zipCode} ${address.country}`
     }
 
     return (
